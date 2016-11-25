@@ -1,0 +1,50 @@
+"Games"
+{
+	"cstrike"
+	{
+		"Signatures"
+		{
+			"CTraceFilterSimple::ShouldHitEntity"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x53\x8B\x5D\x0C\x56\x8B\x75\x08\x57\x53\x56\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x83\xC4\x08\x84\xC0"
+				"linux"		"@_ZN18CTraceFilterSimple15ShouldHitEntityEP13IHandleEntityi"
+			}
+
+			"CFlashbangProjectile::Detonate"
+			{
+				"library"	"server"
+				"windows"	"\x53\x56\x8B\xF1\x57\x8B\x86\x2A\x2A\x2A\x2A\xC1\xE8\x0B\xA8\x01\x74\x05\xE8\x2A\x2A\x2A\x2A\xD9\x05\x2A\x2A\x2A\x2A\x6A\x40\x6A\x00\x51"
+				"linux"		"@_ZN20CFlashbangProjectile8DetonateEv"
+			}
+
+			"CPointServerCommand::InputCommand"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x56\x8B\x75\x08\x83\x7E\x2A\x2A\x75\x09\x8B\x46\x08\x85\xC0\x74\x6D\xEB\x08"
+				"linux"		"@_ZN19CPointServerCommand12InputCommandER11inputdata_t"
+			}
+
+			"CCSPlayer::HandleCommand_JoinTeam"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x58\x89\x4D\xF8\xE8\x2A\x2A\x2A\x2A\x89\x45\xF4\x8B\x45\x08\x50"
+				"linux"		"@_ZN9CCSPlayer22HandleCommand_JoinTeamEi"
+			}
+
+			"CCSBotManager::BotAddCommand"
+			{
+				"library"	"server"
+				"windows"	"\x6A\xFF\x68\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x83\xC4\x08\xC3\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x80\x78\x2A\x2A\x75\x28"
+				"linux"		"@_ZN13CCSBotManager13BotAddCommandEibPKc12CSWeaponType17BotDifficultyType"
+			}
+
+			"CCSGameRules::TeamFull"
+			{
+				"library"	"server"
+				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x8B\x45\x08\x83\xE8\x02\x74\x20\x48"
+				"linux"		"@_ZN12CCSGameRules8TeamFullEi"
+			}
+		}
+	}
+}
