@@ -10,7 +10,7 @@ public Plugin myinfo = {
 	name        = "tengu-test",
 	author      = "Tengu",
 	description = "Tengu is love, Tengu is life",
-	version     = "1.0",
+	version     = "0.1",
 	url         = "https://steamcommunity.com/id/tengulawl"
 };
 
