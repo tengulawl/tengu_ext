@@ -1,6 +1,7 @@
 #include <sourcemod>
-#include <tengu>
+#include <sdktools>
 #include <cstrike>
+#include <tengu>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -27,6 +28,7 @@ public Action OnShouldHitEntity(int touchEnt, int passEnt, int collisionGroup, i
 
 public Action OnFlashbangDetonate(int entity)
 {
+	AcceptEntityInput(entity, "Kill");
 	return Plugin_Handled;
 }
 
@@ -36,25 +38,19 @@ public Action OnPointServerCommand(const char[] command)
 	return Plugin_Handled;
 }
 
-public bool OnCanJoinTeam(bool isBot, int team, bool originalResult)
+public Action OnCanBotJoinTeam(int team, bool& result)
 {
-	if (isBot) {
-		if (team == CS_TEAM_T) {
-			return true;
-		}
+	result = (team != CS_TEAM_CT);
+	return Plugin_Handled;
+}
 
-		if (team == CS_TEAM_CT) {
-			return false;
-		}
+public Action OnCanJoinTeam(int client, int team, bool& result)
+{
+	if (IsFakeClient(client)) {
+		result = (team != CS_TEAM_CT);
 	} else {
-		if (team == CS_TEAM_T) {
-			return false;
-		}
-
-		if (team == CS_TEAM_CT) {
-			return true;
-		}
+		result = (team != CS_TEAM_T);
 	}
 
-	return originalResult;
+	return Plugin_Handled;
 }

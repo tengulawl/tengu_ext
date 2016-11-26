@@ -8,6 +8,7 @@ IGameConfig* g_gameConfig = nullptr;
 IForward* g_shouldHitEntityForward = nullptr;
 IForward* g_flashbangDetonateForward = nullptr;
 IForward* g_pointServerCommandForward = nullptr;
+IForward* g_canBotJoinTeamForward = nullptr;
 IForward* g_canJoinTeamForward = nullptr;
 CDetour* g_shouldHitEntity = nullptr;
 CDetour* g_flashbangDetonate = nullptr;
@@ -15,9 +16,10 @@ CDetour* g_pointServerCommand = nullptr;
 CDetour* g_joinTeamCommand = nullptr;
 CDetour* g_botAddCommand = nullptr;
 CDetour* g_teamFullCheck = nullptr;
+CDetour* g_teamStackedCheck = nullptr;
 const int g_passEntOffset = 4;
 const int g_collisionOffs = 8;
-CBasePlayer* g_joinTeamPlayer = nullptr;
+cell_t g_joinTeamPlayer = 0;
 bool g_inBotAddCommand = false;
 
 DETOUR_DECL_MEMBER2(MyShouldHitEntity, bool, IHandleEntity*, pHandleEntity, int, contentsMask)
@@ -88,11 +90,11 @@ DETOUR_DECL_MEMBER1(MyPointServerCommand, void, inputdata_t&, inputdata)
 
 DETOUR_DECL_MEMBER1(MyJoinTeamCommand, bool, int, team)
 {
-	g_joinTeamPlayer = (CBasePlayer*)this;
+	g_joinTeamPlayer = gamehelpers->EntityToBCompatRef((CBaseEntity*)this);
 
 	bool ret = DETOUR_MEMBER_CALL(MyJoinTeamCommand)(team);
 
-	g_joinTeamPlayer = nullptr;
+	g_joinTeamPlayer = 0;
 
 	return ret;
 }
@@ -110,27 +112,34 @@ DETOUR_DECL_MEMBER5(MyBotAddCommand, bool, int, team, bool, isFromConsole, const
 
 DETOUR_DECL_MEMBER1(MyTeamFullCheck, bool, int, teamId)
 {
-	bool ret = DETOUR_MEMBER_CALL(MyTeamFullCheck)(teamId);
-
-	if (g_joinTeamPlayer || g_inBotAddCommand) {
+	if (g_joinTeamPlayer) {
 		if (g_canJoinTeamForward->GetFunctionCount()) {
-			cell_t isBot = true;
-			cell_t result = (cell_t)!ret;
+			cell_t isBot = 1, ret = 0, result = Pl_Continue;
 
-			if (g_joinTeamPlayer) {
-				isBot = g_joinTeamPlayer->IsBot();
-			}
-
-			g_canJoinTeamForward->PushCell(isBot);
+			g_canJoinTeamForward->PushCell(g_joinTeamPlayer);
 			g_canJoinTeamForward->PushCell(teamId);
-			g_canJoinTeamForward->PushCell(result);
+			g_canJoinTeamForward->PushCellByRef(&ret);
 			g_canJoinTeamForward->Execute(&result);
 
-			ret = !result;
+			if (result != Pl_Continue) {
+				return !ret;
+			}
+		}
+	} else if (g_inBotAddCommand) {
+		if (g_canBotJoinTeamForward->GetFunctionCount()) {
+			cell_t ret = 0, result = Pl_Continue;
+
+			g_canBotJoinTeamForward->PushCell(teamId);
+			g_canBotJoinTeamForward->PushCellByRef(&ret);
+			g_canBotJoinTeamForward->Execute(&result);
+
+			if (result != Pl_Continue) {
+				return !ret;
+			}
 		}
 	}
 
-	return ret;
+	return DETOUR_MEMBER_CALL(MyTeamFullCheck)(teamId);
 }
 
 bool CTenguExt::SDK_OnLoad(char* error, size_t maxlength, bool late)
@@ -147,7 +156,8 @@ bool CTenguExt::SDK_OnLoad(char* error, size_t maxlength, bool late)
 	g_shouldHitEntityForward = forwards->CreateForward("OnShouldHitEntity", ET_Hook, 5, nullptr, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_CellByRef);
 	g_flashbangDetonateForward = forwards->CreateForward("OnFlashbangDetonate", ET_Hook, 1, nullptr, Param_Cell);
 	g_pointServerCommandForward = forwards->CreateForward("OnPointServerCommand", ET_Hook, 1, nullptr, Param_String);
-	g_canJoinTeamForward = forwards->CreateForward("OnCanJoinTeam", ET_Hook, 3, nullptr, Param_Cell, Param_Cell, Param_Cell);
+	g_canBotJoinTeamForward = forwards->CreateForward("OnCanBotJoinTeam", ET_Hook, 2, nullptr, Param_Cell, Param_CellByRef);
+	g_canJoinTeamForward = forwards->CreateForward("OnCanJoinTeam", ET_Hook, 3, nullptr, Param_Cell, Param_Cell, Param_CellByRef);
 
 	CDetourManager::Init(smutils->GetScriptingEngine(), g_gameConfig);
 
@@ -173,6 +183,7 @@ void CTenguExt::SDK_OnUnload()
 	forwards->ReleaseForward(g_shouldHitEntityForward);
 	forwards->ReleaseForward(g_flashbangDetonateForward);
 	forwards->ReleaseForward(g_pointServerCommandForward);
+	forwards->ReleaseForward(g_canBotJoinTeamForward);
 	forwards->ReleaseForward(g_canJoinTeamForward);
 
 	gameconfs->CloseGameConfigFile(g_gameConfig);
