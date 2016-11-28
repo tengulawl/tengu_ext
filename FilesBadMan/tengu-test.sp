@@ -38,19 +38,20 @@ public Action OnPointServerCommand(const char[] command)
 	return Plugin_Handled;
 }
 
-public Action OnCanBotJoinTeam(int team, bool& result)
+public Action OnCanJoinTeam(bool fakeClient, int team, bool& result)
 {
-	result = (team != CS_TEAM_CT);
-	return Plugin_Handled;
-}
-
-public Action OnCanJoinTeam(int client, int team, bool& result)
-{
-	if (IsFakeClient(client)) {
+	if (fakeClient) {
 		result = (team != CS_TEAM_CT);
 	} else {
 		result = (team != CS_TEAM_T);
 	}
 
 	return Plugin_Handled;
+}
+
+public void OnGetPlayerMaxSpeed(int client, float& maxSpeed)
+{
+	if (!IsFakeClient(client)) {
+		maxSpeed *= 2.0;
+	}
 }

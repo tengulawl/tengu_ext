@@ -9,7 +9,7 @@
 /* Basic information exposed publicly */
 #define SMEXT_CONF_NAME			"Tengu"
 #define SMEXT_CONF_DESCRIPTION	"Tengu is love, Tengu is life"
-#define SMEXT_CONF_VERSION		"0.1"
+#define SMEXT_CONF_VERSION		"0.2"
 #define SMEXT_CONF_AUTHOR		"Tengu"
 #define SMEXT_CONF_URL			"https://steamcommunity.com/id/tengulawl"
 #define SMEXT_CONF_LOGTAG		"TENGU"

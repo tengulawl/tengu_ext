@@ -6,7 +6,8 @@
 forward Action OnShouldHitEntity(int touchEnt, int passEnt, int collisionGroup, int contentsMask, bool& result);
 forward Action OnFlashbangDetonate(int entity);
 forward Action OnPointServerCommand(const char[] command);
-forward Action OnCanJoinTeam(bool isBot, int team, bool& result);
+forward Action OnCanJoinTeam(bool fakeClient, int team, bool& result);
+forward void OnGetPlayerMaxSpeed(int client, float& maxSpeed);
 
 public Extension __ext_tengu = {
 	name = "tengu",

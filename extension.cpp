@@ -11,12 +11,14 @@ IForward* g_should_hit_entity_forward = nullptr;
 IForward* g_flashbang_detonate_forward = nullptr;
 IForward* g_point_server_command_forward = nullptr;
 IForward* g_can_join_team_forward = nullptr;
+IForward* g_get_max_speed_forward = nullptr;
 CDetour* g_should_hit_entity = nullptr;
 CDetour* g_flashbang_detonate = nullptr;
 CDetour* g_point_server_command = nullptr;
 CDetour* g_join_team_command = nullptr;
 CDetour* g_bot_add_command = nullptr;
 CDetour* g_team_full_check = nullptr;
+CDetour* g_get_player_max_speed = nullptr;
 const int g_pass_entity_offset = 4;
 const int g_collision_group_offset = 8;
 CBaseEntity* g_join_team_player = nullptr;
@@ -139,6 +141,21 @@ DETOUR_DECL_MEMBER1(TeamFullCheck, bool, int, team_id)
 	return DETOUR_MEMBER_CALL(TeamFullCheck)(team_id);
 }
 
+DETOUR_DECL_MEMBER0(GetPlayerMaxSpeed, float)
+{
+	float max_speed = DETOUR_MEMBER_CALL(GetPlayerMaxSpeed)();
+
+	if (g_get_max_speed_forward->GetFunctionCount()) {
+		cell_t client = gamehelpers->EntityToBCompatRef((CBaseEntity*)this);
+		
+		g_get_max_speed_forward->PushCell(client);
+		g_get_max_speed_forward->PushFloatByRef(&max_speed);
+		g_get_max_speed_forward->Execute();
+	}
+
+	return max_speed;
+}
+
 bool CTenguExt::SDK_OnLoad(char* error, size_t maxlength, bool late)
 {
 	char config_error[256];
@@ -154,6 +171,7 @@ bool CTenguExt::SDK_OnLoad(char* error, size_t maxlength, bool late)
 	g_flashbang_detonate_forward = forwards->CreateForward("OnFlashbangDetonate", ET_Hook, 1, nullptr, Param_Cell);
 	g_point_server_command_forward = forwards->CreateForward("OnPointServerCommand", ET_Hook, 1, nullptr, Param_String);
 	g_can_join_team_forward = forwards->CreateForward("OnCanJoinTeam", ET_Hook, 3, nullptr, Param_Cell, Param_Cell, Param_CellByRef);
+	g_get_max_speed_forward = forwards->CreateForward("OnGetPlayerMaxSpeed", ET_Ignore, 2, nullptr, Param_Cell, Param_FloatByRef);
 
 	CDetourManager::Init(smutils->GetScriptingEngine(), g_game_config);
 
@@ -163,6 +181,7 @@ bool CTenguExt::SDK_OnLoad(char* error, size_t maxlength, bool late)
 	DETOUR_CREATE_MEMBER_EX(g_join_team_command, JoinTeamCommand, "CCSPlayer::HandleCommand_JoinTeam");
 	DETOUR_CREATE_MEMBER_EX(g_bot_add_command, BotAddCommand, "CCSBotManager::BotAddCommand");
 	DETOUR_CREATE_MEMBER_EX(g_team_full_check, TeamFullCheck, "CCSGameRules::TeamFull");
+	DETOUR_CREATE_MEMBER_EX(g_get_player_max_speed, GetPlayerMaxSpeed, "CCSPlayer::GetPlayerMaxSpeed");
 
 	return true;
 }
@@ -175,11 +194,13 @@ void CTenguExt::SDK_OnUnload()
 	DETOUR_DESTROY_EX(g_join_team_command);
 	DETOUR_DESTROY_EX(g_bot_add_command);
 	DETOUR_DESTROY_EX(g_team_full_check);
+	DETOUR_DESTROY_EX(g_get_player_max_speed);
 
 	forwards->ReleaseForward(g_should_hit_entity_forward);
 	forwards->ReleaseForward(g_flashbang_detonate_forward);
 	forwards->ReleaseForward(g_point_server_command_forward);
 	forwards->ReleaseForward(g_can_join_team_forward);
+	forwards->ReleaseForward(g_get_max_speed_forward);
 
 	gameconfs->CloseGameConfigFile(g_game_config);
 }
