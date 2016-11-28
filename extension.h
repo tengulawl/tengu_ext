@@ -9,11 +9,6 @@ class CTenguExt : public SDKExtension
 public:
 	virtual bool SDK_OnLoad(char* error, size_t maxlength, bool late);
 	virtual void SDK_OnUnload();
-
-#if defined SMEXT_CONF_METAMOD
-	virtual bool SDK_OnMetamodLoad(ISmmAPI* ismm, char* error, size_t maxlen, bool late);
-	//virtual bool SDK_OnMetamodUnload(char* error, size_t maxlength);
-#endif
 };
 
 #define DETOUR_DECL_MEMBER5(name, ret, p1type, p1name, p2type, p2name, p3type, p3name, p4type, p4name, p5type, p5name) \

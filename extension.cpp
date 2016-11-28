@@ -4,8 +4,6 @@
 CTenguExt g_Tengu;
 SMEXT_LINK(&g_Tengu);
 
-IServerGameEnts* g_server_game_ents = nullptr;
-IPlayerInfoManager* g_player_info_manager = nullptr;
 IGameConfig* g_game_config = nullptr;
 IForward* g_should_hit_entity_forward = nullptr;
 IForward* g_flashbang_detonate_forward = nullptr;
@@ -21,7 +19,7 @@ CDetour* g_team_full_check = nullptr;
 CDetour* g_get_player_max_speed = nullptr;
 const int g_pass_entity_offset = 4;
 const int g_collision_group_offset = 8;
-CBaseEntity* g_join_team_player = nullptr;
+cell_t g_join_team_player = 0;
 bool g_in_bot_add_command = false;
 
 DETOUR_DECL_MEMBER2(ShouldHitEntity, bool, IHandleEntity*, pHandleEntity, int, contentsMask)
@@ -93,11 +91,11 @@ DETOUR_DECL_MEMBER1(PointServerCommand, void, inputdata_t&, inputdata)
 
 DETOUR_DECL_MEMBER1(JoinTeamCommand, bool, int, team)
 {
-	g_join_team_player = reinterpret_cast<CBaseEntity*>(this);
+	g_join_team_player = gamehelpers->EntityToBCompatRef((CBaseEntity*)this);
 
 	bool res = DETOUR_MEMBER_CALL(JoinTeamCommand)(team);
 
-	g_join_team_player = nullptr;
+	g_join_team_player = 0;
 
 	return res;
 }
@@ -122,9 +120,13 @@ DETOUR_DECL_MEMBER1(TeamFullCheck, bool, int, team_id)
 			cell_t ret = Pl_Continue;
 
 			if (g_join_team_player && !g_in_bot_add_command) {
-				edict_t* edict = g_server_game_ents->BaseEntityToEdict(g_join_team_player);
-				IPlayerInfo* player_info = g_player_info_manager->GetPlayerInfo(edict);
-				fake_client = player_info->IsFakeClient();
+				IGamePlayer* player = playerhelpers->GetGamePlayer(g_join_team_player);
+
+				if (player->IsSourceTV() || player->IsReplay()) {
+					return DETOUR_MEMBER_CALL(TeamFullCheck)(team_id);
+				}
+
+				fake_client = player->IsFakeClient();
 			}
 
 			g_can_join_team_forward->PushCell(fake_client);
@@ -203,12 +205,4 @@ void CTenguExt::SDK_OnUnload()
 	forwards->ReleaseForward(g_get_max_speed_forward);
 
 	gameconfs->CloseGameConfigFile(g_game_config);
-}
-
-bool CTenguExt::SDK_OnMetamodLoad(ISmmAPI* ismm, char* error, size_t maxlen, bool late)
-{
-	GET_V_IFACE_CURRENT(GetServerFactory, g_server_game_ents, IServerGameEnts, INTERFACEVERSION_SERVERGAMEENTS);
-	GET_V_IFACE_CURRENT(GetServerFactory, g_player_info_manager, IPlayerInfoManager, INTERFACEVERSION_PLAYERINFOMANAGER);
-
-	return true;
 }
