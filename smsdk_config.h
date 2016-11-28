@@ -13,7 +13,7 @@
 #define SMEXT_CONF_AUTHOR		"Tengu"
 #define SMEXT_CONF_URL			"https://steamcommunity.com/id/tengulawl"
 #define SMEXT_CONF_LOGTAG		"TENGU"
-#define SMEXT_CONF_LICENSE		"GPL"
+#define SMEXT_CONF_LICENSE		""
 #define SMEXT_CONF_DATESTRING	__DATE__
 
 /** 
