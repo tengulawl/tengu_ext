@@ -3,11 +3,11 @@
 #endif
 #define _tengu_included
 
-forward Action OnShouldHitEntity(int touchEnt, int passEnt, int collisionGroup, int contentsMask, bool& result);
+forward Action OnShouldHitEntity(int touch_entity, int pass_entity, int collision_group, int contents_mask, bool& result);
 forward Action OnFlashbangDetonate(int entity);
 forward Action OnPointServerCommand(const char[] command);
-forward Action OnCanJoinTeam(bool fakeClient, int team, bool& result);
-forward void OnGetPlayerMaxSpeed(int client, float& maxSpeed);
+forward Action OnCanJoinTeam(bool is_bot, int team_id, bool& result);
+forward void OnGetPlayerMaxSpeed(int client, float& max_speed);
 
 public Extension __ext_tengu = {
 	name = "tengu",

@@ -10,14 +10,14 @@ public Plugin myinfo = {
 	name        = "tengu-test",
 	author      = "Tengu",
 	description = "Tengu is love, Tengu is life",
-	version     = "0.1",
+	version     = "0.2",
 	url         = "https://steamcommunity.com/id/tengulawl"
 };
 
-public Action OnShouldHitEntity(int touchEnt, int passEnt, int collisionGroup, int contentsMask, bool& result)
+public Action OnShouldHitEntity(int touch_entity, int pass_entity, int collision_group, int contents_mask, bool& result)
 {
-	if ((0 < touchEnt <= MaxClients) && (0 < passEnt <= MaxClients)) {
-		if (IsFakeClient(touchEnt) || IsFakeClient(passEnt)) {
+	if ((0 < touch_entity <= MaxClients) && (0 < pass_entity <= MaxClients)) {
+		if (IsFakeClient(touch_entity) || IsFakeClient(pass_entity)) {
 			result = false;
 			return Plugin_Handled;
 		}
@@ -38,20 +38,23 @@ public Action OnPointServerCommand(const char[] command)
 	return Plugin_Handled;
 }
 
-public Action OnCanJoinTeam(bool fakeClient, int team, bool& result)
+public Action OnCanJoinTeam(bool is_bot, int team_id, bool& result)
 {
-	if (fakeClient) {
-		result = (team != CS_TEAM_CT);
+	if (is_bot) {
+		result = (team_id != CS_TEAM_CT);
 	} else {
-		result = (team != CS_TEAM_T);
+		result = (team_id != CS_TEAM_T);
 	}
 
 	return Plugin_Handled;
 }
 
-public void OnGetPlayerMaxSpeed(int client, float& maxSpeed)
+public Action OnGetPlayerMaxSpeed(int client, float& max_speed)
 {
 	if (!IsFakeClient(client)) {
-		maxSpeed *= 2.0;
+		max_speed *= 2.0;
+		return Plugin_Changed;
 	}
+
+	return Plugin_Continue;
 }
