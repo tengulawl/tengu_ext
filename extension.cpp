@@ -164,12 +164,12 @@ DETOUR_DECL_MEMBER0(GetPlayerMaxSpeed, float)
 	return result;
 }
 
-bool CTenguExt::SDK_OnLoad(char* error, size_t max_length, bool late)
+bool CTenguExt::SDK_OnLoad(char* error, size_t maxlength, bool late)
 {
 	char config_error[256];
 
 	if (!gameconfs->LoadGameConfigFile("tengu.games", &g_game_config, config_error, sizeof(config_error))) {
-		snprintf(error, max_length, "Could not read tengu.games: %s", config_error);
+		snprintf(error, maxlength, "Could not read tengu.games: %s", config_error);
 		return false;
 	}
 
