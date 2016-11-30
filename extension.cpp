@@ -45,11 +45,11 @@ DETOUR_DECL_MEMBER2(ShouldHitEntity, bool, IHandleEntity*, handle_entity, int, c
 		g_should_hit_entity_forward->Execute(&pl_res);
 
 		if (pl_res != Pl_Continue) {
-			return res != 0;
+			return result != 0;
 		}
 	}
 
-	return DETOUR_MEMBER_CALL(ShouldHitEntity)(pHandleEntity, contentsMask);
+	return DETOUR_MEMBER_CALL(ShouldHitEntity)(handle_entity, contents_mask);
 }
 
 DETOUR_DECL_MEMBER0(FlashbangDetonate, void)
